@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassMon 學獸培育計畫 - QR Code 自動登入版</title>
+    <title>ClassMon 學獸培育計畫 - 安全防護鎖定版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -18,7 +18,7 @@
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f1f5f9; margin: 0; padding: 0; color: var(--text-main); }
+        body { background: #f1f5f9; margin: 0; padding: 0; color: var(--text-main); transition: background 0.5s; }
         
         .navbar { background: var(--bg-dark); color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .navbar h1 { margin: 0; font-size: 24px; color: #38bdf8; }
@@ -87,7 +87,7 @@
     <div class="navbar">
         <h1><i class="fa-solid fa-shrimp"></i> ClassMon 學獸培育系統</h1>
         <div class="nav-tabs no-print">
-            <button class="nav-btn active" id="btn-gallery-tab" onclick="switchTab('gallery-tab', this)"><i class="fa-solid fa-images"></i> 全班學獸大圖鑑</button>
+            <button class="nav-btn active" id="btn-gallery-tab" onclick="switchTab('gallery-tab', this)"><i class="fa-solid fa-images"></i> 全班大圖鑑</button>
             <button class="nav-btn" id="btn-teacher-tab" onclick="switchTab('teacher-tab', this)"><i class="fa-solid fa-chalkboard-user"></i> 教師控制台</button>
             <button class="nav-btn" id="btn-student-tab" onclick="switchTab('student-tab', this)"><i class="fa-solid fa-tablet-screen-button"></i> 學生平板端</button>
             <button class="nav-btn" id="btn-qrcode-tab" onclick="switchTab('qrcode-tab', this)"><i class="fa-solid fa-qrcode"></i> QR 碼中心</button>
@@ -99,7 +99,6 @@
         <div id="gallery-tab" class="tab-content active">
             <div class="card">
                 <h2><i class="fa-solid fa-chart-simple"></i> 全班學獸即時戰況投影圖鑑</h2>
-                <p style="font-size: 14px; color: #64748b;">將此畫面投影至教室大螢幕，學生能即時看到全班各組的寵物型態、等級以及剩餘飼料數量！</p>
                 <div class="gallery-grid" id="classGalleryGrid"></div>
             </div>
         </div>
@@ -114,10 +113,10 @@
 
             <div class="card">
                 <h2><i class="fa-solid fa-wheat-awn"></i> 雙週小組黑板分數登錄 (自動轉換為飼料)</h2>
-                <p style="font-size: 14px; color: #ef4444; font-weight: bold;">💡 遊戲規則：實體黑板每滿 50 分，系統會自動轉換為 1 個「飼料」發給該組所有組員！</p>
+                <p style="font-size: 14px; color: #ef4444; font-weight: bold;">💡 每滿 50 分轉換為 1 個「飼料」發給該組！</p>
                 <div class="group-grid" id="teacherGroupGrid"></div>
                 <br>
-                <button class="btn btn-success" onclick="submitGroupScoresToFood()"><i class="fa-solid fa-wheat-awn-circle-exclamation"></i> 結算分數並發配飼料給組員</button>
+                <button class="btn btn-success" onclick="submitGroupScoresToFood()"><i class="fa-solid fa-wheat-awn-circle-exclamation"></i> 結算分數並發配飼料</button>
             </div>
 
             <div class="card">
@@ -125,7 +124,7 @@
                 <div style="max-height: 300px; overflow-y: scroll; border: 1px solid #e2e8f0; border-radius: 8px;">
                     <table>
                         <thead>
-                            <tr><th>座號</th><th>當前組別</th><th>當前學獸</th><th>現有印章</th><th>發放本週印章 (勾選)</th></tr>
+                            <tr><th>座號</th><th>當前組別</th><th>當前學獸</th><th>現有印章</th><th>發放本週印章</th></tr>
                         </thead>
                         <tbody id="teacherStudentTable"></tbody>
                     </table>
@@ -138,16 +137,16 @@
                 <h2><i class="fa-solid fa-trophy"></i> 月底賽季結算與 JSON 備份存檔</h2>
                 <div style="display:flex; gap:15px; margin-bottom: 15px;">
                     <input type="file" id="jsonUpload" accept=".json" class="btn" style="background:#cbd5e1; color:black;">
-                    <button class="btn btn-success" onclick="exportData()"><i class="fa-solid fa-download"></i> 下載今日班級 JSON 進度檔</button>
+                    <button class="btn btn-success" onclick="exportData()"><i class="fa-solid fa-download"></i> 下載備份檔</button>
                 </div>
-                <button class="btn btn-danger" onclick="executeEndSeason()"><i class="fa-solid fa-box-archive"></i> 結束本月賽季，重置小組分數並存入歷史殿堂</button>
+                <button class="btn btn-danger" onclick="executeEndSeason()"><i class="fa-solid fa-box-archive"></i> 結束本月賽季，重置分數並存檔</button>
             </div>
         </div>
 
         <div id="student-tab" class="tab-content">
-            <div class="card" style="text-align:center;">
+            <div class="card" id="student-selector-card" style="text-align:center;">
                 <h2><i class="fa-solid fa-tablet-screen-button"></i> 學生個人平板畫面模擬</h2>
-                <p>請選取座號以登入學生隨隨身載具介面：</p>
+                <p>請選取座號以登入學生隨身載具介面：</p>
                 <select id="studentSelector" onchange="simulateStudentLogin(this.value)" style="padding:10px; font-size:16px; border-radius:6px; width:200px;"></select>
             </div>
 
@@ -170,8 +169,8 @@
                 </div>
 
                 <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <button class="btn btn-success" style="padding:15px;" onclick="studentActionFeed()"><i class="fa-solid fa-cookie-bite"></i> 餵食 1 個飼料 (升1級)</button>
-                    <button class="btn btn-primary" style="padding:15px; background:#eab308; color:black;" onclick="studentActionEvolve()"><i class="fa-solid fa-wand-magic-sparkles"></i> 消耗章突破進化！</button>
+                    <button class="btn btn-success" style="padding:15px;" onclick="studentActionFeed()"><i class="fa-solid fa-cookie-bite"></i> 餵食升級</button>
+                    <button class="btn btn-primary" style="padding:15px; background:#eab308; color:black;" onclick="studentActionEvolve()"><i class="fa-solid fa-wand-magic-sparkles"></i> 突破進化</button>
                 </div>
             </div>
         </div>
@@ -179,14 +178,11 @@
         <div id="qrcode-tab" class="tab-content">
             <div class="card">
                 <div class="no-print">
-                    <h2><i class="fa-solid fa-print"></i> 學生專屬登入 QR Code 一鍵印製面板</h2>
-                    <p>點擊下方按鈕後，系統會為 1~30 號的每位同學生成專屬的貼紙卡片。完成後可直接按 <code>Ctrl + P</code> 列印。</p>
-                    <button class="btn btn-primary" onclick="renderQRCodes()"><i class="fa-solid fa-qrcode"></i> ⚡ 批量生成 1~30 號 QR Code</button>
+                    <h2><i class="fa-solid fa-print"></i> QR Code 一鍵印製</h2>
+                    <button class="btn btn-primary" onclick="renderQRCodes()"><i class="fa-solid fa-qrcode"></i> ⚡ 批量生成</button>
                     <hr style="border:1px solid #e2e8f0; margin:20px 0;">
                 </div>
-                <div class="qr-grid" id="qrPrintArea">
-                    <p style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 20px;">請點擊上方按鈕生成條碼卡片</p>
-                </div>
+                <div class="qr-grid" id="qrPrintArea"></div>
             </div>
         </div>
 
@@ -204,13 +200,12 @@
 
         window.onload = function() {
             initDefaultClassData();
-            checkUrlParamsForAutoLogin(); // 【關鍵修正】網頁啟動時，第一時間檢查是否有掃碼參數
+            checkUrlParamsForAutoLogin(); 
         };
 
         function initDefaultClassData() {
             const types = ["water", "fire", "leaf"];
             let students = [];
-
             for (let i = 1; i <= 30; i++) {
                 let formattedId = i < 10 ? "0" + i : "" + i;
                 let randomType = types[(i % 3)];
@@ -240,29 +235,36 @@
             refreshAllUI();
         }
 
-        // 【核心修正功能】自動解析 QR Code 網址參數並跳轉登入
+        // 【安全防護機制修改點】
         function checkUrlParamsForAutoLogin() {
             const urlParams = new URLSearchParams(window.location.search);
-            const studentId = urlParams.get('id'); // 取得網址列中的 ?id=XX
+            const studentId = urlParams.get('id'); 
 
             if (studentId) {
-                // 在資料庫中尋找對應座號的學生索引值
                 const studentIndex = systemDatabase.students.findIndex(st => st.id === studentId);
                 
                 if (studentIndex !== -1) {
-                    // 1. 自動切換到學生平板端的介面
                     const studentBtn = document.getElementById('btn-student-tab');
                     switchTab('student-tab', studentBtn);
                     
-                    // 2. 刷新選單並讓選單選中該生
                     updateStudentSelector();
                     document.getElementById('studentSelector').value = studentIndex;
-                    
-                    // 3. 直接驅動登入，渲染學生專屬的寵物艙
                     simulateStudentLogin(studentIndex);
                     
-                    // 4. 跳出友善歡迎訊息
-                    alert(`👋 歡迎 ${studentId} 號同學，已成功透過安全條碼登入個人學獸艙！`);
+                    // --- 啟動防護：學生鎖定模式 ---
+                    // 1. 隱藏導覽列 (禁止亂切換分頁)
+                    const navTabs = document.querySelector('.nav-tabs');
+                    if(navTabs) navTabs.style.display = 'none';
+
+                    // 2. 隱藏座號下拉選單卡片 (防止偷選別人座號)
+                    const selectorCard = document.getElementById('student-selector-card');
+                    if(selectorCard) selectorCard.style.display = 'none';
+
+                    // 3. 深色沉浸模式 (讓網頁看起來像單機 APP)
+                    document.body.style.background = "#1e293b";
+                    
+                    // 提示成功
+                    alert(`👋 歡迎 ${studentId} 號同學，系統已為你安全鎖定介面！`);
                 }
             }
         }
@@ -297,8 +299,7 @@
         function submitGroupScoresToFood() {
             const scores = systemDatabase.currentSeason.groupScores;
             const leftovers = systemDatabase.currentSeason.groupLeftoverScores || { "第 1 組": 0, "第 2 組": 0, "第 3 組": 0, "第 4 組": 0, "第 5 組": 0 };
-            let logMessage = "【雙週飼料結算報告】\n";
-
+            
             for(let groupName in scores) {
                 const inputVal = parseInt(document.getElementById(`groupScore-${groupName}`).value) || 0;
                 const previousLeftover = leftovers[groupName] || 0;
@@ -315,11 +316,9 @@
                         if (st.groupId === groupName) st.foodCount += grantedFood;
                     });
                 }
-                logMessage += `${groupName}：發配個人飼料 x${grantedFood} 包，餘數 ${newLeftover} 分併入下期。\n`;
             }
-
             systemDatabase.currentSeason.groupLeftoverScores = leftovers;
-            alert(logMessage);
+            alert("✅ 已成功發放飼料並保留餘分！");
             refreshAllUI();
         }
 
@@ -353,8 +352,8 @@
                     <tr>
                         <td><b>${st.id} 號</b></td>
                         <td><span style="color:var(--primary); font-weight:bold;">${st.groupId}</span></td>
-                        <td>${st.pet.name} (Lv.${st.pet.level})</td>
-                        <td><span style="color:var(--warning); font-weight:bold;"><i class="fa-solid fa-award"></i> ${st.evolutionStars}</span> 個</td>
+                        <td>${st.pet.name}</td>
+                        <td><span style="color:var(--warning); font-weight:bold;">${st.evolutionStars}</span></td>
                         <td><input type="checkbox" class="stamp-cb" data-index="${idx}"></td>
                     </tr>
                 `;
@@ -370,7 +369,7 @@
                     <div class="group-box">
                         <strong>${groupName}</strong><br>
                         <span style="font-size:11px; color:gray;">(滾存餘分: ${currentLeftover})</span><br>
-                        <input type="number" id="groupScore-${groupName}" value="${scores[groupName]}"> 分
+                        <input type="number" id="groupScore-${groupName}" value="${scores[groupName]}">
                     </div>
                 `;
             }
@@ -385,16 +384,13 @@
         }
 
         function submitWeeklyStamps() {
-            const checkboxes = document.querySelectorAll('.stamp-cb');
-            let giveCount = 0;
-            checkboxes.forEach(cb => {
+            document.querySelectorAll('.stamp-cb').forEach(cb => {
                 if(cb.checked) {
                     systemDatabase.students[cb.getAttribute('data-index')].evolutionStars += 1;
                     cb.checked = false;
-                    giveCount++;
                 }
             });
-            alert(`已成功發放 ${giveCount} 個印章！`);
+            alert("✅ 印章發放成功！");
             refreshAllUI();
         }
 
@@ -403,7 +399,7 @@
             const scores = systemDatabase.currentSeason.groupScores;
             for(let gName in scores) { scores[gName] = 0; systemDatabase.currentSeason.groupLeftoverScores[gName] = 0; }
             systemDatabase.students.forEach(st => st.evolutionStars = 0);
-            systemDatabase.currentSeason.seasonName = prompt("新賽季主題：", "盛夏冒險之章") || "新賽季";
+            systemDatabase.currentSeason.seasonName = prompt("新賽季主題：", "新賽季") || "新賽季";
             refreshAllUI();
         }
 
@@ -411,7 +407,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(systemDatabase, null, 2));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `ClassMon_進度備份.json`);
+            dlAnchor.setAttribute("download", `ClassMon.json`);
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
@@ -449,7 +445,7 @@
 
         function studentActionFeed() {
             const student = systemDatabase.students[currentActiveStudentIndex];
-            if (student.foodCount < 1) { alert("❌ 背包裡沒有飼料了！"); return; }
+            if (student.foodCount < 1) { alert("❌ 飼料不足！"); return; }
             student.foodCount -= 1;
             student.pet.level += 1;
             renderTabletView();
@@ -459,15 +455,13 @@
         function studentActionEvolve() {
             const student = systemDatabase.students[currentActiveStudentIndex];
             const currentStage = student.pet.stage;
-
-            if (student.evolutionStars < 1) { alert("❌ 沒有一級棒章！"); return; }
+            if (student.evolutionStars < 1) { alert("❌ 印章不足！"); return; }
             if (currentStage === 1 && student.pet.level < 10) { alert("❌ 需達 Lv.10 才能進化！"); return; }
             if (currentStage === 2 && student.pet.level < 25) { alert("❌ 需達 Lv.25 才能進化！"); return; }
 
             student.evolutionStars -= 1;
             student.pet.stage += 1;
             student.pet.name = petConfig[student.pet.type][student.pet.stage].name;
-
             alert(`🎉 成功進化為【${student.pet.name}】！`);
             renderTabletView();
             refreshAllUI();
@@ -476,8 +470,6 @@
         function renderQRCodes() {
             const printArea = document.getElementById('qrPrintArea');
             printArea.innerHTML = '';
-            
-            // 重要：此處會抓取您目前瀏覽器網址列上的真實路徑
             const baseUrl = window.location.href.split('?')[0];
 
             systemDatabase.students.forEach(st => {
@@ -495,11 +487,9 @@
                     const targetContainer = document.getElementById(`qrContainer-${st.id}`);
                     if(targetContainer) {
                         new QRCode(targetContainer, {
-                            text: `${baseUrl}?id=${st.id}`, // 打包成自帶自動登入參數的專屬網址
-                            width: 130,
-                            height: 130,
-                            colorDark : "#1e293b",
-                            colorLight : "#ffffff",
+                            text: `${baseUrl}?id=${st.id}`,
+                            width: 130, height: 130,
+                            colorDark : "#1e293b", colorLight : "#ffffff",
                             correctLevel : QRCode.CorrectLevel.M
                         });
                     }
